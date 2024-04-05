@@ -38,10 +38,5 @@ function saveFile() {
 </template>
 
 <style scoped>
-    @media screen and (max-width: 576px) {
-        .app-layout {
-            width: 90%;
-        }
-    }
 
 </style>

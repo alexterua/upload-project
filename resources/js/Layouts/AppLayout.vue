@@ -11,5 +11,9 @@ import Navigation from "@/Components/Navigation.vue";
 </template>
 
 <style scoped>
-
+    @media screen and (max-width: 576px) {
+        .app-layout {
+            width: 90%;
+        }
+    }
 </style>
