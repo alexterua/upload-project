@@ -6,10 +6,13 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Http\UploadedFile;
 
 class File extends Model
 {
     use HasFactory;
+
+    const STORAGE_OPTION = 'public';
 
     protected $guarded = false;
     protected $table = 'files';
@@ -32,18 +35,38 @@ class File extends Model
         return $this->hasMany(IncorrectRow::class, 'file_id', 'id');
     }
 
-    public static function saveToDB($dataFile)
+    /** @return int */
+    public function getId(): int
     {
-        // Here you can add a private static method to generate unique file names by adding a timestamp tag.
-        // Then save, for example, on s3
+        return $this->id;
+    }
+
+    /**
+     * @param UploadedFile $dataFile
+     * @return string
+     */
+    public static function saveToStorage(UploadedFile $dataFile): string
+    {
+        $filenameWithoutExtension = pathinfo($dataFile->getClientOriginalName(), PATHINFO_FILENAME);
+        $fileName = $filenameWithoutExtension . '_' . time() . '.' . $dataFile->getClientOriginalExtension();
+        $file = $dataFile->storeAs('files', $fileName, File::STORAGE_OPTION);
+
+        return $file;
+    }
+
+    /**
+     * @param UploadedFile $dataFile
+     * @return self
+     */
+    public static function saveToDB(UploadedFile $dataFile): self
+    {
         $user = auth()->user();
 
-        $file = File::create([
+        return File::create([
             'name' => $dataFile->getClientOriginalName(),
             'mime_type' => $dataFile->getClientOriginalExtension(),
             'user_id' => $user->getId()
         ]);
-
-        return $file;
     }
+
 }
