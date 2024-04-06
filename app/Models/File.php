@@ -42,6 +42,18 @@ class File extends Model
         return $this->id;
     }
 
+    /** @return string */
+    public function getName(): string
+    {
+        return $this->name;
+    }
+
+    /** @return string */
+    public function getFormattedDate(): string
+    {
+        return $this->created_at->format('Y-m-d H:i');
+    }
+
     /**
      * @param UploadedFile $dataFile
      * @return string
