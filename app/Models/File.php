@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Factories\FileFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -61,11 +62,12 @@ class File extends Model
     public static function saveToDB(UploadedFile $dataFile): self
     {
         $user = auth()->user();
+        $fileFactory = FileFactory::make($dataFile, $user->getId());
 
         return File::create([
-            'name' => $dataFile->getClientOriginalName(),
-            'mime_type' => $dataFile->getClientOriginalExtension(),
-            'user_id' => $user->getId()
+            'name' => $fileFactory->getName(),
+            'mime_type' => $fileFactory->getMimeType(),
+            'user_id' => $fileFactory->getUserId()
         ]);
     }
 

@@ -2,6 +2,8 @@
 
 namespace App\Imports;
 
+use App\Factories\IncorrectRowFactory;
+use App\Factories\RowFactory;
 use App\Models\IncorrectRow;
 use App\Models\Row;
 use Illuminate\Support\Collection;
@@ -26,14 +28,16 @@ class DataImport implements ToCollection
                 });
 
                 if ($allMatch) {
+                    $rowFactory = RowFactory::make($row, $this->fileId);
                     Row::create([
-                        'data' => $row,
-                        'file_id' => $this->fileId
+                        'data' => $rowFactory->getData(),
+                        'file_id' => $rowFactory->getFileId()
                     ]);
                 } else {
+                    $incorrectRowFactory = IncorrectRowFactory::make($row, $this->fileId);
                     IncorrectRow::create([
-                        'data' => $row,
-                        'file_id' => $this->fileId
+                        'data' => $incorrectRowFactory->getData(),
+                        'file_id' => $incorrectRowFactory->getFileId()
                     ]);
                 }
             }
