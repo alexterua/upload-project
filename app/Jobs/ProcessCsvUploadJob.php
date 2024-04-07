@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use App\Events\FileUploadCompleted;
 use App\Imports\DataImport;
 use App\Models\File;
 use Illuminate\Bus\Queueable;
@@ -36,6 +37,7 @@ class ProcessCsvUploadJob implements ShouldQueue
     public function handle(Excel $excel): int
     {
         $excel->import(new DataImport($this->fileId), $this->path, File::STORAGE_OPTION);
+        broadcast(new FileUploadCompleted($this->fileId));
 
         return Command::SUCCESS;
     }

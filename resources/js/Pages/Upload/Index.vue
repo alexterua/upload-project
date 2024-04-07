@@ -1,11 +1,12 @@
 <script setup>
 import AppLayout from "@/Layouts/AppLayout.vue";
 import { router, useForm, usePage } from '@inertiajs/vue3'
-import { ref } from "vue";
+import {onMounted, ref} from "vue";
 import Pagination from "@/Components/Pagination.vue";
 
 const form = useForm({
     file: null,
+    isLoading: false,
 })
 const fileInput = ref(null)
 const { props } = usePage();
@@ -18,15 +19,22 @@ function setFile(e) {
 }
 
 async function saveFile() {
+    form.isLoading = true;
     const formData = new FormData
     formData.append('file', form.file)
     await router.post('/upload', formData)
     form.file = null
-    setTimeout(() => {
-        console.log('setTimeout')
-        location.reload()
-    }, 3000)
 }
+
+onMounted(() => {
+    {
+        window.Echo.channel('files')
+            .listen('FileUploadCompleted', e => {
+                form.isLoading = false;
+                location.reload()
+            })
+    }
+})
 </script>
 
 <template>
@@ -38,6 +46,9 @@ async function saveFile() {
             </form>
             <div v-if="form.file" class="ml-4">
                 <a @click.prevent="saveFile" href="#" class="w-fit p-2 pl-4 pr-4 rounded-full bg-gray-100 block mx-auto hover:bg-gray-500 hover:text-white">Save</a>
+            </div>
+            <div v-if="form.isLoading" class="overlay">
+                <div class="spinner"></div>
             </div>
         </div>
 
@@ -96,5 +107,31 @@ async function saveFile() {
 </template>
 
 <style scoped>
+    .overlay {
+        position: fixed;
+        z-index: 1000;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
 
+    .spinner {
+        position: absolute;
+        border: 16px solid #f3f3f3;
+        border-radius: 50%;
+        border-top: 16px solid #3498db;
+        width: 120px;
+        height: 120px;
+        animation: spin 2s linear infinite;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
 </style>
