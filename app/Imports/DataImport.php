@@ -21,7 +21,10 @@ class DataImport implements ToCollection
     /** @param Collection $collection */
     public function collection(Collection $collection): void
     {
-        $collection->chunk(500)->each(function ($rows) {
+        $rowsToInsert = [];
+        $incorrectRowsToInsert = [];
+
+        $collection->chunk(500)->each(function ($rows) use (&$rowsToInsert, &$incorrectRowsToInsert) {
             foreach ($rows as $row) {
                 $allMatch = $row->every(function ($item) {
                     return is_string($item) && ctype_alpha(str_replace(' ', '', $item));
@@ -29,20 +32,29 @@ class DataImport implements ToCollection
 
                 if ($allMatch) {
                     $rowFactory = RowFactory::make($row, $this->fileId);
-                    Row::create([
+                    $rowsToInsert[] = [
                         'data' => $rowFactory->getData(),
                         'file_id' => $rowFactory->getFileId()
-                    ]);
+                    ];
                 } else {
                     $incorrectRowFactory = IncorrectRowFactory::make($row, $this->fileId);
-                    IncorrectRow::create([
+                    $incorrectRowsToInsert[] = [
                         'data' => $incorrectRowFactory->getData(),
                         'file_id' => $incorrectRowFactory->getFileId()
-                    ]);
+                    ];
                 }
             }
-        });
 
+            if (!empty($rowsToInsert)) {
+                Row::insert($rowsToInsert);
+                $rowsToInsert = [];
+            }
+
+            if (!empty($incorrectRowsToInsert)) {
+                IncorrectRow::insert($incorrectRowsToInsert);
+                $incorrectRowsToInsert = [];
+            }
+        });
     }
 
 }
