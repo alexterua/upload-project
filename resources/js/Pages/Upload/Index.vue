@@ -1,7 +1,8 @@
 <script setup>
 import AppLayout from "@/Layouts/AppLayout.vue";
-import {router, useForm, usePage} from '@inertiajs/vue3'
+import { router, useForm, usePage } from '@inertiajs/vue3'
 import { ref } from "vue";
+import Pagination from "@/Components/Pagination.vue";
 
 const form = useForm({
     file: null,
@@ -16,10 +17,15 @@ function setFile(e) {
     form.file = e.target.files[0]
 }
 
-function saveFile() {
+async function saveFile() {
     const formData = new FormData
     formData.append('file', form.file)
-    router.post('/upload', formData)
+    await router.post('/upload', formData)
+    form.file = null
+    setTimeout(() => {
+        console.log('setTimeout')
+        location.reload()
+    }, 3000)
 }
 </script>
 
@@ -59,11 +65,11 @@ function saveFile() {
                                 </th>
                             </tr>
                             </thead>
-                            <tbody v-for="file in props.files">
+                            <tbody v-for="(file, index) in props.files.data">
 
                                 <tr class="bg-gray-100 border-b">
                                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                        {{ file.currentNumber }}
+                                        {{ index + 1 + (props.files.meta.current_page - 1) * props.files.meta.per_page }}
                                     </td>
                                     <td class="text-sm text-gray-900 font-light px-6 py-4 whitespace-nowrap">
                                         {{ file.fileName }}
@@ -85,6 +91,7 @@ function saveFile() {
                 </div>
             </div>
         </div>
+        <Pagination></Pagination>
     </AppLayout>
 </template>
 

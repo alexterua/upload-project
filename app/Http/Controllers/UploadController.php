@@ -12,9 +12,9 @@ class UploadController extends Controller
     public function index()
     {
         $user = auth()->user();
-        $files = $user->files->sortDesc();
+        $files = $user->files()->orderByDesc('created_at')->paginate(5);
 
-        $files = FileResource::collection($files)->resolve();
+        $files = FileResource::collection($files);
 
         return inertia('Upload/Index', compact('files'));
     }

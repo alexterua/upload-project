@@ -33,7 +33,7 @@ class ProcessCsvUploadJob implements ShouldQueue
     {
         $excel->import(new DataImport($this->fileId), $this->path, File::STORAGE_OPTION);
 
-        return  Command::SUCCESS;
+        return Command::SUCCESS;
     }
 
 }
