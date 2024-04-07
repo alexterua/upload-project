@@ -19,6 +19,10 @@ class ProcessCsvUploadJob implements ShouldQueue
     private string $path;
     private int $fileId;
 
+    /**
+     * @param string $path
+     * @param int $fileId
+     */
     public function __construct(string $path, int $fileId)
     {
         $this->path = $path;
