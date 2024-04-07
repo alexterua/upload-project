@@ -12,7 +12,7 @@ class UploadController extends Controller
     public function index()
     {
         $user = auth()->user();
-        $files = $user->files()->orderByDesc('created_at')->paginate(5);
+        $files = $user->files()->orderByDesc('created_at')->paginate(10);
 
         $files = FileResource::collection($files);
 
